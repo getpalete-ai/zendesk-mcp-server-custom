@@ -1,0 +1,21 @@
+[project]
+name = "mcp-zendesk"
+version = "0.0.2"
+description = "MCP server for Zendesk integration - Customized"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp[cli]>=1.6.0",
+    "httpx>=0.24.0",
+]
+
+[project.scripts]
+mcp-zendesk = "mcp_zendesk.__init__:main"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.urls]
+"Homepage" = "https://github.com/nicolas-voltier/zendesk-mcp-server-custom"
+"Bug Tracker" = "https://github.com/nicolas-voltier/zendesk-mcp-server-custom/issues"
