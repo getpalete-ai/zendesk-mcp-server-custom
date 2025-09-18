@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 import os
 
 # Load environment variables BEFORE importing server module
-load_dotenv(dotenv_path=r"C:\Users\volti\OneDrive\Documents\Python_projects\zendesk-mcp-server-custom\.env", override=True)
+load_dotenv(dotenv_path=".env", override=True)
 
 from server import make_zendesk_request
 import asyncio
@@ -23,8 +23,8 @@ async def main():
 
     field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
 
-    result = await make_zendesk_request("PUT", "/api/v2/tickets/3d.json", {"ticket": {"custom_fields": [
-      {"id": field_map["Merchant Name"], "value": "test_Merchant"}]}})
+    # result = await make_zendesk_request("PUT", "/api/v2/tickets/3d.json", {"ticket": {"custom_fields": [
+    #   {"id": field_map["Merchant Name"], "value": "test_Merchant"}]}})
     # for ticket in result["tickets"]:
         
 
