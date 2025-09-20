@@ -75,7 +75,7 @@ async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) ->
 # === TOOLS ===
 
 @mcp.tool()
-async def get_ticket(ticket_id: int) -> str:
+async def get_ticket_details(ticket_id: int) -> str:
     """
     Get details of a specific Zendesk ticket.
     
@@ -89,6 +89,25 @@ async def get_ticket(ticket_id: int) -> str:
     
     # Format the ticket in a readable way
     ticket = result.get("ticket", {})
+    fields_to_expose=["id",
+                      "subject",
+                      "description",
+                      "status",
+                      "priority",
+                      "requester_id",
+                      "assignee_id",
+                      "created_at",
+                      "updated_at",
+                      "tags"]
+    fields_if_non_null=["external_id","due_at","custom_fields"]
+    output_str=''
+    for field in fields_to_expose:
+        if field in ticket:
+            output_str += f"{field}: {ticket[field]} \n"
+    for field in fields_if_non_null:
+        if field in ticket and ticket[field] is not None:
+            output_str += f"{field}: {ticket[field]} \n"
+
     # formatted_ticket = {
     #     "id": ticket.get("id"),
     #     "subject": ticket.get("subject"),
@@ -101,8 +120,7 @@ async def get_ticket(ticket_id: int) -> str:
     #     "updated_at": ticket.get("updated_at"),
     #     "tags": ticket.get("tags", [])
     # }
-    
-    return json.dumps(ticket, indent=2)
+    return output_str
 
 @mcp.tool()
 async def create_ticket(subject: str, description: str, priority: Optional[str] = None, 
@@ -136,6 +154,19 @@ async def create_ticket(subject: str, description: str, priority: Optional[str] 
     
     ticket = result.get("ticket", {})
     return f"Ticket created successfully! Ticket ID: {ticket.get('id')}, Subject: '{ticket.get('subject')}'"
+
+@mcp.tool()
+async def _get_tickets_fields_map() -> str:
+    """
+    Get a list of ticket fields in the Zendesk account.
+    """
+    result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
+    for field in result["ticket_fields"]:
+        print(field["title"],":",field["id"])
+
+    field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
+
+    return field_map
 
 @mcp.tool()
 async def update_ticket(ticket_id: int, status: Optional[str] = None, 
@@ -403,3 +434,9 @@ def ticket_analysis_prompt() -> str:
 if __name__ == "__main__":
     print("Starting Zendesk MCP server...", file=sys.stderr)
     mcp.run()
+
+
+print("=== DEBUG: Registered Tools ===", file=sys.stderr)
+for tool_name in mcp._tool_manager._tools:
+    print(f"Tool: {tool_name}", file=sys.stderr)
+print("===============================", file=sys.stderr)
