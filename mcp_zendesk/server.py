@@ -72,7 +72,45 @@ async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) ->
                 "message": str(e)
             }
 
+
+
 # === TOOLS ===
+
+@mcp.tool()
+async def get_ticket_comments(ticket_id: int) -> str:
+    """
+    Get comments of a specific Zendesk ticket.
+    """
+    result = await make_zendesk_request("GET", f"/api/v2/tickets/{ticket_id}/comments.json")
+    
+    if "error" in result:
+        return f"Error retrieving ticket comments: {result.get('message', 'Unknown error')}"
+    
+    # Format the ticket comments in a readable way
+    comments = result.get("comments", [])
+    for comment in comments:
+        print("---------")
+        for field in comment:
+            print(field,":",comment[field])
+
+
+@mcp.tool()
+async def get_users(user_ids: list) -> dict:
+    """
+    Get details of a specific Zendesk user.
+    user_ids: List of user IDs
+    """
+    user_ids_str = ",".join(str(user_id) for user_id in user_ids)
+    result = await make_zendesk_request("GET", f"/api/v2/users/show_many.json?ids={user_ids_str}")
+    users:List[Dict] = result.get("users", [])
+    for user in users:
+        print("---------")
+        for field in user:
+            print(field,":",user[field])
+    
+    dict_users = {user.pop("id"): user for user in users}
+    return dict_users
+
 
 @mcp.tool()
 async def get_ticket_details(ticket_id: int) -> str:
@@ -156,16 +194,14 @@ async def create_ticket(subject: str, description: str, priority: Optional[str] 
     return f"Ticket created successfully! Ticket ID: {ticket.get('id')}, Subject: '{ticket.get('subject')}'"
 
 @mcp.tool()
-async def _get_tickets_fields_map() -> str:
+async def get_tickets_fields_map() -> str:
     """
     Get a list of ticket fields in the Zendesk account.
     """
     result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
     for field in result["ticket_fields"]:
         print(field["title"],":",field["id"])
-
-    field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
-
+    field_map={field["id"]:field["title"] for field in result["ticket_fields"]}
     return field_map
 
 @mcp.tool()
@@ -302,6 +338,8 @@ async def add_ticket_comment(ticket_id: int, comment: str, public: bool = True) 
     status = "public" if public else "private"
     return f"Added {status} comment to ticket {ticket_id} successfully!"
 
+
+
 # === RESOURCES ===
 
 @mcp.resource("zendesk://tickets")
@@ -434,9 +472,3 @@ def ticket_analysis_prompt() -> str:
 if __name__ == "__main__":
     print("Starting Zendesk MCP server...", file=sys.stderr)
     mcp.run()
-
-
-print("=== DEBUG: Registered Tools ===", file=sys.stderr)
-for tool_name in mcp._tool_manager._tools:
-    print(f"Tool: {tool_name}", file=sys.stderr)
-print("===============================", file=sys.stderr)
