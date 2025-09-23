@@ -77,7 +77,7 @@ async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) ->
 # === TOOLS ===
 
 @mcp.tool()
-async def get_ticket_comments(ticket_id: str) -> list[Dict]:
+async def get_ticket_comments(ticket_id: str) -> str:
     """
     Get comments of a specific Zendesk ticket.
     """
@@ -92,7 +92,7 @@ async def get_ticket_comments(ticket_id: str) -> list[Dict]:
         print("---------")
         for field in comment:
             print(field,":",comment[field])
-    return comments
+    return json.dumps(comments)
 
 
 @mcp.tool()
