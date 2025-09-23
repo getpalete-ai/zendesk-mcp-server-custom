@@ -87,6 +87,7 @@ async def get_ticket_comments(ticket_id: str) -> str:
         return f"Error retrieving ticket comments: {result.get('message', 'Unknown error')}"
     
     # Format the ticket comments in a readable way
+    print(result)
     comments = result.get("comments", [])
     for comment in comments:
         print("---------")
