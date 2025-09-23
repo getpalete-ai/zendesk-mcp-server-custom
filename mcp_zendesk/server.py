@@ -194,7 +194,7 @@ async def create_ticket(subject: str, description: str, priority: Optional[str] 
     return f"Ticket created successfully! Ticket ID: {ticket.get('id')}, Subject: '{ticket.get('subject')}'"
 
 @mcp.tool()
-async def get_tickets_fields_map() -> str:
+async def get_tickets_fields_map() -> dict:
     """
     Get a list of ticket fields in the Zendesk account.
     """
