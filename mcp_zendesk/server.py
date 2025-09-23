@@ -128,24 +128,24 @@ async def get_ticket_details(ticket_id: str) -> str:
     
     # Format the ticket in a readable way
     ticket = result.get("ticket", {})
-    fields_to_expose=["id",
-                      "subject",
-                      "description",
-                      "status",
-                      "priority",
-                      "requester_id",
-                      "assignee_id",
-                      "created_at",
-                      "updated_at",
-                      "tags"]
-    fields_if_non_null=["external_id","due_at","custom_fields"]
-    output_str=''
-    for field in fields_to_expose:
-        if field in ticket:
-            output_str += f"{field}: {ticket[field]} \n"
-    for field in fields_if_non_null:
-        if field in ticket and ticket[field] is not None:
-            output_str += f"{field}: {ticket[field]} \n"
+    # fields_to_expose=["id",
+    #                   "subject",
+    #                   "description",
+    #                   "status",
+    #                   "priority",
+    #                   "requester_id",
+    #                   "assignee_id",
+    #                   "created_at",
+    #                   "updated_at",
+    #                   "tags"]
+    # fields_if_non_null=["external_id","due_at","custom_fields"]
+    # output_str=''
+    # for field in fields_to_expose:
+    #     if field in ticket:
+    #         output_str += f"{field}: {ticket[field]} \n"
+    # for field in fields_if_non_null:
+    #     if field in ticket and ticket[field] is not None:
+    #         output_str += f"{field}: {ticket[field]} \n"
 
     # formatted_ticket = {
     #     "id": ticket.get("id"),
@@ -159,7 +159,7 @@ async def get_ticket_details(ticket_id: str) -> str:
     #     "updated_at": ticket.get("updated_at"),
     #     "tags": ticket.get("tags", [])
     # }
-    return output_str
+    return ticket
 
 @mcp.tool()
 async def create_ticket(subject: str, description: str, priority: Optional[str] = None, 
