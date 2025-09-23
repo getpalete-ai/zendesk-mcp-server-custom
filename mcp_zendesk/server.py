@@ -77,7 +77,7 @@ async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) ->
 # === TOOLS ===
 
 @mcp.tool()
-async def get_ticket_comments(ticket_id: int) -> str:
+async def get_ticket_comments(ticket_id: int) -> list[Dict]:
     """
     Get comments of a specific Zendesk ticket.
     """
@@ -92,6 +92,7 @@ async def get_ticket_comments(ticket_id: int) -> str:
         print("---------")
         for field in comment:
             print(field,":",comment[field])
+    return comments
 
 
 @mcp.tool()
@@ -388,7 +389,7 @@ async def get_users() -> str:
     return json.dumps(user_summaries, indent=2)
 
 @mcp.resource("zendesk://ticket-fields")
-async def get_ticket_fields() -> str:
+async def get_ticket_fields() -> list[Dict]:
     """Get a list of ticket fields in the Zendesk account."""
     result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
     
@@ -409,7 +410,7 @@ async def get_ticket_fields() -> str:
             "custom_field": field.get("custom_field", False)
         })
     
-    return json.dumps(field_summaries, indent=2)
+    return field_summaries
 
 @mcp.resource("zendesk://groups")
 async def get_groups() -> str:
