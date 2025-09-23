@@ -114,7 +114,7 @@ async def get_users(user_ids: list) -> dict:
 
 
 @mcp.tool()
-async def get_ticket_details(ticket_id: str) -> str:
+async def get_ticket_details(ticket_id: str) -> dict:
     """
     Get details of a specific Zendesk ticket.
     
