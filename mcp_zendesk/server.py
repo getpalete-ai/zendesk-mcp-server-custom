@@ -81,19 +81,10 @@ async def get_ticket_comments(ticket_id: str) -> str:
     """
     Get comments of a specific Zendesk ticket.
     """
-    result = await make_zendesk_request("GET", f"/api/v2/tickets/{ticket_id}/comments.json")
+    comments_result = await make_zendesk_request("GET", f"/api/v2/tickets/{ticket_id}/comments.json")
     
-    if "error" in result:
-        return f"Error retrieving ticket comments: {result.get('message', 'Unknown error')}"
-    
-    # Format the ticket comments in a readable way
-    print(result)
-    comments = result.get("comments", [])
-    for comment in comments:
-        print("---------")
-        for field in comment:
-            print(field,":",comment[field])
-    return json.dumps(comments)
+
+    return json.dumps(comments_result)
 
 
 @mcp.tool()
