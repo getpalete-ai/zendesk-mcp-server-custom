@@ -231,7 +231,7 @@ async def update_ticket(ticket_id: int, status: Optional[str] = None,
                 field_id = field_map[field]
                 ticket_data["ticket"]["custom_fields"].append({"id": field_id, "value": custom_fields[field]})
             except KeyError:
-                raise ValueError(f"Field {field} not found in field map.")
+                raise ValueError(f"Field {field} not found in field map. Existing fields: {field_map}")
 
     if not any([status, priority]):
         return "No update parameters provided. Ticket remains unchanged."
