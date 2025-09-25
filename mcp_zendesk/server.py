@@ -226,9 +226,10 @@ async def update_ticket(ticket_id: int, status: Optional[str] = None,
     if custom_fields:
         ticket_data["ticket"]["custom_fields"]=[]
         field_map = await  get_tickets_fields_map()
+        inverted_map = dict((v, k) for k, v in field_map.items())
         for field in custom_fields:
             try:
-                field_id = field_map[field]
+                field_id = inverted_map[field]
                 ticket_data["ticket"]["custom_fields"].append({"id": field_id, "value": custom_fields[field]})
             except KeyError:
                 raise ValueError(f"Field {field} not found in field map. Existing fields: {field_map}")
