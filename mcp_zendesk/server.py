@@ -199,7 +199,9 @@ async def get_tickets_fields_map() -> dict:
 
 @mcp.tool()
 async def update_ticket(ticket_id: int, status: Optional[str] = None, 
-                       priority: Optional[str] = None, comment: Optional[dict] = None) -> str:
+                       priority: Optional[str] = None,
+                       tags: Optional[str] = None,
+                       custom_fields: Optional[dict] = None) -> str:
     """
     Update an existing Zendesk ticket.
     
@@ -207,8 +209,7 @@ async def update_ticket(ticket_id: int, status: Optional[str] = None,
         ticket_id: The ID of the ticket to update
         status: New status (open, pending, solved, closed)
         priority: New priority (low, normal, high, urgent)
-        comment: Comment to add to the ticket in a dictionary format, such as {"body": "comment", "public": true/false}
-        tags: 
+        custom_fields: Dictionary of custom fields to update
     """
     # Prepare the update data
     ticket_data = {"ticket": {}}
@@ -217,12 +218,22 @@ async def update_ticket(ticket_id: int, status: Optional[str] = None,
         ticket_data["ticket"]["status"] = status
     if priority:
         ticket_data["ticket"]["priority"] = priority
-    if comment:
-        ticket_data["ticket"]["comment"] = comment
     
-    
+    if tags:
+        ticket_data["ticket"]["tags"] = [tag.strip() for tag in tags.split(",")]
     # Only proceed if we have something to update
-    if not any([status, priority, comment]):
+
+    if custom_fields:
+        ticket_data["ticket"]["custom_fields"]=[]
+        field_map = await  get_tickets_fields_map()
+        for field in custom_fields:
+            try:
+                field_id = field_map[field]
+                ticket_data["ticket"]["custom_fields"].append({"id": field_id, "value": custom_fields[field]})
+            except KeyError:
+                raise ValueError(f"Field {field} not found in field map.")
+
+    if not any([status, priority]):
         return "No update parameters provided. Ticket remains unchanged."
     
     result = await make_zendesk_request("PUT", f"/api/v2/tickets/{ticket_id}.json", ticket_data)
