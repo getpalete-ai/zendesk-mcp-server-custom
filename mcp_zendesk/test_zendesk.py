@@ -20,9 +20,9 @@ async def main():
     result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
     # for field in result["ticket_fields"]:
     #     print(field["title"],":",field["id"])
-
-    field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
-    print(field_map)
+    print(result)
+    # field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
+    # print(field_map)
 
     # result = await make_zendesk_request("GET", "/api/v2/users/show_many.json?ids=10470154166941,10471965582365")
     # for user in result["users"]:
