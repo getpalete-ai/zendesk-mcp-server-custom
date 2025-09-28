@@ -17,13 +17,14 @@ print("ZENDESK_EMAIL: ", ZENDESK_EMAIL)
 print("ZENDESK_API_TOKEN: ", ZENDESK_API_TOKEN)
 
 async def main():
-    # result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
+    result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
     # for field in result["ticket_fields"]:
     #     print(field["title"],":",field["id"])
 
-    # field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
+    field_map={field["title"]: field["id"] for field in result["ticket_fields"]}
+    print(field_map)
 
-    # result = await make_zendesk_request("GET", "/api/v2/users/show_many.json?ids=10470154166941,30475703687709")
+    # result = await make_zendesk_request("GET", "/api/v2/users/show_many.json?ids=10470154166941,10471965582365")
     # for user in result["users"]:
     #     print("---------")
     #     for field in user:
@@ -31,10 +32,10 @@ async def main():
 
     # input("Press Enter to continue...")
 
-    # print("---------")
-    # result = await make_zendesk_request("GET", "/api/v2/tickets/48935.json")
-    # for field in result["ticket"]:
-    #     print(field,":",result["ticket"][field])
+    print("---------")
+    result = await make_zendesk_request("GET", "/api/v2/tickets/49306.json")
+    for field in result["ticket"]:
+        print(field,":",result["ticket"][field])
     
     # ticket_data = {
     #     "ticket": {
@@ -43,14 +44,36 @@ async def main():
     #             "public": True
     #         }
     #     }
-    # }
-    print("---------")
-    result = await make_zendesk_request("GET", "/api/v2/tickets/48935/comments.json")
-    comments = result.get("comments", [])
-    for comment in comments:
-        print("---------")
-        for field in comment:
-            print(field,":",comment[field])
+    # # }
+    # result = await make_zendesk_request("GET", "/api/v2/users.json?ids=")
+    
+    # if "error" in result:
+    #     return f"Error retrieving users: {result.get('message', 'Unknown error')}"
+    
+    # # Format the users in a readable way
+    # users = result.get("users", [])
+    # user_summaries = {}
+    
+    # for user in users:
+    #     user_summaries[user.get("id")] = {
+    #         "name": user.get("name"),
+    #         "email": user.get("email"),
+    #         "role": user.get("role")
+    #     }
+    # print(user_summaries)
+    # print("---------")
+    # result = await make_zendesk_request("GET", "/api/v2/tickets/49218/comments.json")
+    # comments = result.get("comments", [])
+    # author_ids = [comment.get("author_id") for comment in comments]
+    # author_ids_str = ",".join(str(author_id) for author_id in author_ids)
+    # result = await make_zendesk_request("GET", f"/api/v2/users/show_many.json?ids={author_ids_str}")
+    # users = result.get("users", [])
+    # user_summaries = {str(user.get("id")): user for user in users}
+    # for comment in comments:
+    #     author_id = comment.get("author_id")
+    #     print(author_id,"--->",user_summaries[str(author_id)]["role"],"--->")
+    #     print(comment)
+    #     print("---------")
     # output = await make_zendesk_request("PUT", "/api/v2/tickets/48935.json", ticket_data)
     # print(output)
 
@@ -58,6 +81,12 @@ async def main():
     #   {"id": field_map["Merchant Name"], "value": "test_Merchant"}]}})
     # for ticket in result["tickets"]:
         
+
+    # result= await make_zendesk_request("GET", "/api/v2/organizations.json")
+    # for org in result["organizations"]:
+    #     for field in org:
+    #         print(field,":",org[field])
+    #     print("---------")
 
 
 if __name__ == "__main__":
