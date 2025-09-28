@@ -1,8 +1,30 @@
 from dotenv import load_dotenv
 import os
 
+# Debug: Check current working directory and .env file
+print(f"Current working directory: {os.getcwd()}")
+print(f".env file exists: {os.path.exists('.env')}")
+
 # Load environment variables BEFORE importing server module
-load_dotenv(dotenv_path=".env", override=True)
+result = load_dotenv(dotenv_path=".env", override=True)
+print(f"load_dotenv result: {result}")
+
+# Try alternative paths if .env not found
+if not result:
+    print("Trying alternative .env paths...")
+    alternative_paths = [
+        "../.env",
+        "../../.env", 
+        "/home/ec2-user/zendesk-mcp-server-custom/.env",
+        os.path.join(os.path.dirname(__file__), "..", ".env")
+    ]
+    
+    for path in alternative_paths:
+        print(f"Trying path: {path}")
+        if os.path.exists(path):
+            result = load_dotenv(dotenv_path=path, override=True)
+            print(f"Found .env at {path}, load result: {result}")
+            break
 
 from server import make_zendesk_request
 import asyncio
@@ -15,6 +37,22 @@ ZENDESK_API_TOKEN = os.environ.get("ZENDESK_API_TOKEN")
 print("ZENDESK_BASE_URL: ", ZENDESK_BASE_URL)
 print("ZENDESK_EMAIL: ", ZENDESK_EMAIL)
 print("ZENDESK_API_TOKEN: ", ZENDESK_API_TOKEN)
+
+# Debug: Check if .env file exists and show its contents
+env_file_path = ".env"
+if os.path.exists(env_file_path):
+    print(f"\n.env file contents:")
+    try:
+        with open(env_file_path, 'r') as f:
+            content = f.read()
+            print(content)
+    except Exception as e:
+        print(f"Error reading .env file: {e}")
+else:
+    print(f"\n.env file not found at {env_file_path}")
+    print("Available files in current directory:")
+    for file in os.listdir("."):
+        print(f"  {file}")
 
 async def main():
     result = await make_zendesk_request("GET", "/api/v2/ticket_fields.json")
