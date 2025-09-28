@@ -371,7 +371,7 @@ async def get_tickets() -> str:
     return json.dumps(ticket_summaries, indent=2)
 
 @mcp.resource("zendesk://users")
-async def get_users() -> str:
+async def get_all_users() -> str:
     """Get a list of Zendesk users."""
     result = await make_zendesk_request("GET", "/api/v2/users.json")
     
