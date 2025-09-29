@@ -361,18 +361,19 @@ async def get_tickets(page: int = 1, per_page: int = 1000) -> str:
     
     # Format the tickets in a readable way
     tickets = result.get("tickets", [])
-    ticket_summaries = []
+    return tickets
+    # ticket_summaries = []
     
-    for ticket in tickets:
-        ticket_summaries.append({
-            "id": ticket.get("id"),
-            "subject": ticket.get("subject"),
-            "status": ticket.get("status"),
-            "priority": ticket.get("priority"),
-            "created_at": ticket.get("created_at")
-        })
+    # for ticket in tickets:
+    #     ticket_summaries.append({
+    #         "id": ticket.get("id"),
+    #         "subject": ticket.get("subject"),
+    #         "status": ticket.get("status"),
+    #         "priority": ticket.get("priority"),
+    #         "created_at": ticket.get("created_at")
+    #     })
     
-    return json.dumps(ticket_summaries, indent=2)
+    # return json.dumps(ticket_summaries, indent=2)
 
 @mcp.resource("zendesk://users")
 async def get_all_users() -> str:
