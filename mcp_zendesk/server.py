@@ -106,6 +106,24 @@ async def get_users(user_ids: list) -> dict:
 
 
 @mcp.tool()
+async def get_tickets_details(ticket_ids: list) -> list:
+    """
+    Get details of a specific Zendesk ticket.
+    
+    Args:
+        ticket_ids: The Zendesk ticket IDs
+    """
+    ids = ",".join(str(ticket_id) for ticket_id in ticket_ids)
+    result = await make_zendesk_request("GET", f"/api/v2/tickets/show_many?ids={ids}.json")
+    
+    if "error" in result:
+        return f"Error retrieving ticket: {result.get('message', 'Unknown error')}"
+    
+    # Format the ticket in a readable way
+    ticket = result.get("tickets", [])
+    return ticket
+
+@mcp.tool()
 async def get_ticket_details(ticket_id: str) -> dict:
     """
     Get details of a specific Zendesk ticket.
