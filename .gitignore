@@ -2,3 +2,4 @@
 /venv
 mcp-zendesk.service
 old_dotenv
+.env copy
