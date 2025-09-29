@@ -348,9 +348,13 @@ async def add_ticket_comment(ticket_id: int, comment: str, public: bool = True) 
 # === RESOURCES ===
 
 @mcp.tool()
-async def get_tickets() -> str:
+async def get_tickets(page: int = 1, per_page: int = 1000) -> str:
     """Get a list of recent Zendesk tickets."""
-    result = await make_zendesk_request("GET", "/api/v2/tickets.json")
+    params = {
+        "page": page,
+        "per_page": per_page
+    }
+    result = await make_zendesk_request("GET", "/api/v2/tickets.json", params)
     
     if "error" in result:
         return f"Error retrieving tickets: {result.get('message', 'Unknown error')}"
