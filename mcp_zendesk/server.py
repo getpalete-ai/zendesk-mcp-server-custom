@@ -41,7 +41,7 @@ async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) ->
     async with httpx.AsyncClient() as client:
         try:
             if method.upper() == "GET":
-                response = await client.get(url, auth=auth, headers=headers)
+                response = await client.get(url, auth=auth, headers=headers, params=data)
             elif method.upper() == "POST":
                 response = await client.post(url, auth=auth, headers=headers, json=data)
             elif method.upper() == "PUT":
