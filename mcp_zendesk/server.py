@@ -347,7 +347,7 @@ async def add_ticket_comment(ticket_id: int, comment: str, public: bool = True) 
 
 # === RESOURCES ===
 
-@mcp.resource("zendesk://tickets")
+@mcp.tool()
 async def get_tickets() -> str:
     """Get a list of recent Zendesk tickets."""
     result = await make_zendesk_request("GET", "/api/v2/tickets.json")
