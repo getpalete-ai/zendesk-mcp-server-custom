@@ -114,7 +114,7 @@ async def get_tickets_details(ticket_ids: list) -> list:
         ticket_ids: The Zendesk ticket IDs
     """
     ids = ",".join(str(ticket_id) for ticket_id in ticket_ids)
-    result = await make_zendesk_request("GET", f"/api/v2/tickets/show_many?ids={ids}.json")
+    result = await make_zendesk_request("GET", f"/api/v2/tickets/show_many.json?ids={ids}")
     
     if "error" in result:
         return f"Error retrieving ticket: {result.get('message', 'Unknown error')}"
