@@ -348,7 +348,7 @@ async def add_ticket_comment(ticket_id: int, comment: str, public: bool = True) 
 # === RESOURCES ===
 
 @mcp.tool()
-async def get_tickets(page: int = 1, per_page: int = 1000) -> dict:
+async def get_tickets(page: int = 1, per_page: int = 1000) -> str:
     """Get a list of recent Zendesk tickets."""
     params = {
         "page": page,
@@ -361,7 +361,7 @@ async def get_tickets(page: int = 1, per_page: int = 1000) -> dict:
     
     # Format the tickets in a readable way
     tickets = result.get("tickets", [])
-    return tickets
+    return json.dumps(tickets, indent=2)
     # ticket_summaries = []
     
     # for ticket in tickets:
