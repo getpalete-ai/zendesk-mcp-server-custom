@@ -60,7 +60,7 @@ if ! command -v mcp-zendesk &> /dev/null; then
 fi
 
 # Check if nginx is available
-if ! command -v nginx &> /dev/null; then
+if ! command -v nginx &> /dev/null && ! [ -f /usr/sbin/nginx ]; then
     echo "Error: nginx not found. Please install nginx first."
     echo "Ubuntu/Debian: sudo apt install nginx"
     echo "CentOS/RHEL: sudo yum install nginx"
