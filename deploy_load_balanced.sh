@@ -66,27 +66,11 @@ mkdir -p nginx_logs
 
 # Create nginx configuration with dynamic upstream servers
 cat > nginx_mcp.conf << EOF
-# Override default nginx configuration completely
-user nginx;
-worker_processes auto;
-error_log nginx_logs/error.log;
-pid nginx_logs/nginx.pid;
-
 events {
     worker_connections 1024;
 }
 
 http {
-    include       /etc/nginx/mime.types;
-    default_type  application/octet-stream;
-    
-    log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
-                    '\$status \$body_bytes_sent "\$http_referer" '
-                    '"\$http_user_agent" "\$http_x_forwarded_for"';
-    
-    access_log nginx_logs/access.log main;
-    error_log nginx_logs/error.log;
-
     upstream mcp_backend {
         # Load balance across MCP instances (dynamically generated)
 EOF
@@ -158,8 +142,8 @@ done
 # Start nginx with our configuration
 echo "Starting nginx load balancer on port $NGINX_PORT..."
 
-# Start nginx with our complete config
-nginx -c $(pwd)/nginx_mcp.conf &
+# Start nginx with sudo to avoid permission issues
+sudo nginx -c $(pwd)/nginx_mcp.conf &
 
 # Store nginx PID for cleanup
 echo $! > "nginx.pid"
