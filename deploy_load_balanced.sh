@@ -96,24 +96,8 @@ cat >> nginx_mcp.conf << EOF
             add_header Content-Type text/plain;
         }
 
-        # SSE endpoint for MCP
-        location /sse {
-            proxy_pass http://mcp_backend;
-            proxy_set_header Host \$host;
-            proxy_set_header X-Real-IP \$remote_addr;
-            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto \$scheme;
-            
-            # SSE specific headers
-            proxy_set_header Connection '';
-            proxy_http_version 1.1;
-            proxy_buffering off;
-            proxy_cache off;
-            proxy_read_timeout 24h;
-        }
-
-        # Messages endpoint for MCP
-        location /messages/ {
+        # Load balance all MCP requests
+        location / {
             proxy_pass http://mcp_backend;
             proxy_set_header Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
@@ -124,6 +108,11 @@ cat >> nginx_mcp.conf << EOF
             proxy_http_version 1.1;
             proxy_set_header Upgrade \$http_upgrade;
             proxy_set_header Connection "upgrade";
+            
+            # SSE specific settings
+            proxy_buffering off;
+            proxy_cache off;
+            proxy_read_timeout 24h;
             
             # Timeouts
             proxy_connect_timeout 30s;
@@ -157,6 +146,16 @@ done
 
 # Start nginx with our configuration
 echo "Starting nginx load balancer on port $NGINX_PORT..."
+
+# Check if nginx is already running and stop it
+if [ -f "nginx.pid" ]; then
+    nginx_pid=$(cat "nginx.pid")
+    if ps -p $nginx_pid > /dev/null 2>&1; then
+        echo "Stopping existing nginx..."
+        sudo kill $nginx_pid
+        sleep 2
+    fi
+fi
 
 # Start nginx with sudo to avoid permission issues
 sudo nginx -c $(pwd)/nginx_mcp.conf &
