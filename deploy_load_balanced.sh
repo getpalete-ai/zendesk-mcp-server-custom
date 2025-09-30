@@ -96,8 +96,24 @@ cat >> nginx_mcp.conf << EOF
             add_header Content-Type text/plain;
         }
 
-        # Load balance MCP requests
-        location / {
+        # SSE endpoint for MCP
+        location /sse {
+            proxy_pass http://mcp_backend;
+            proxy_set_header Host \$host;
+            proxy_set_header X-Real-IP \$remote_addr;
+            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto \$scheme;
+            
+            # SSE specific headers
+            proxy_set_header Connection '';
+            proxy_http_version 1.1;
+            proxy_buffering off;
+            proxy_cache off;
+            proxy_read_timeout 24h;
+        }
+
+        # Messages endpoint for MCP
+        location /messages/ {
             proxy_pass http://mcp_backend;
             proxy_set_header Host \$host;
             proxy_set_header X-Real-IP \$remote_addr;
