@@ -61,6 +61,9 @@ fi
 
 echo "Starting $INSTANCES MCP server instances with nginx load balancer..."
 
+# Create local directories for nginx
+mkdir -p nginx_logs nginx_temp
+
 # Create nginx configuration with dynamic upstream servers
 cat > nginx_mcp.conf << EOF
 events {
@@ -68,6 +71,15 @@ events {
 }
 
 http {
+    # Use local directories to avoid permission issues
+    access_log $(pwd)/nginx_logs/access.log;
+    error_log $(pwd)/nginx_logs/error.log;
+    client_body_temp_path $(pwd)/nginx_temp/client_body;
+    proxy_temp_path $(pwd)/nginx_temp/proxy;
+    fastcgi_temp_path $(pwd)/nginx_temp/fastcgi;
+    uwsgi_temp_path $(pwd)/nginx_temp/uwsgi;
+    scgi_temp_path $(pwd)/nginx_temp/scgi;
+
     upstream mcp_backend {
         # Load balance across MCP instances (dynamically generated)
 EOF
