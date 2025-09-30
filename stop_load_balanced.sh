@@ -33,6 +33,6 @@ pkill -f "mcp-proxy.*mcp-zendesk" 2>/dev/null
 
 # Clean up nginx config and directories
 rm -f nginx_mcp.conf
-rm -rf nginx_logs nginx_temp
+rm -rf nginx_logs
 
 echo "All load balanced instances stopped."

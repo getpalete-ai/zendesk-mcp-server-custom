@@ -62,29 +62,30 @@ fi
 echo "Starting $INSTANCES MCP server instances with nginx load balancer..."
 
 # Create local directories for nginx
-echo "Creating nginx directories..."
-mkdir -p nginx_logs nginx_temp
-chmod 755 nginx_logs nginx_temp
-
-# Verify directories were created
-if [ ! -d "nginx_logs" ] || [ ! -d "nginx_temp" ]; then
-    echo "Error: Failed to create nginx directories"
-    exit 1
-fi
-echo "Nginx directories created successfully"
+mkdir -p nginx_logs
 
 # Create nginx configuration with dynamic upstream servers
 cat > nginx_mcp.conf << EOF
+# Override default nginx configuration completely
+user nginx;
+worker_processes auto;
+error_log nginx_logs/error.log;
+pid nginx_logs/nginx.pid;
+
 events {
     worker_connections 1024;
 }
 
 http {
-    # Use local directories to avoid permission issues
-    access_log nginx_logs/access.log;
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    
+    log_format main '\$remote_addr - \$remote_user [\$time_local] "\$request" '
+                    '\$status \$body_bytes_sent "\$http_referer" '
+                    '"\$http_user_agent" "\$http_x_forwarded_for"';
+    
+    access_log nginx_logs/access.log main;
     error_log nginx_logs/error.log;
-    client_body_temp_path nginx_temp/client_body;
-    proxy_temp_path nginx_temp/proxy;
 
     upstream mcp_backend {
         # Load balance across MCP instances (dynamically generated)
@@ -157,8 +158,8 @@ done
 # Start nginx with our configuration
 echo "Starting nginx load balancer on port $NGINX_PORT..."
 
-# Start nginx with explicit prefix to override all default paths
-nginx -p $(pwd) -c nginx_mcp.conf &
+# Start nginx with our complete config
+nginx -c $(pwd)/nginx_mcp.conf &
 
 # Store nginx PID for cleanup
 echo $! > "nginx.pid"
