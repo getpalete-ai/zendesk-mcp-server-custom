@@ -5,6 +5,8 @@ import json
 from typing import Dict, List, Optional, Any, Union
 import httpx
 from mcp.server.fastmcp import FastMCP
+import asyncio
+from functools import lru_cache
 
 # Create an MCP server
 mcp = FastMCP("Zendesk MCP")
@@ -17,6 +19,30 @@ ZENDESK_API_TOKEN = os.environ.get("ZENDESK_API_TOKEN")
 # Check if environment variables are set
 if not all([ZENDESK_BASE_URL, ZENDESK_EMAIL, ZENDESK_API_TOKEN]):
     print("Warning: Zendesk environment variables not fully configured. Set ZENDESK_BASE_URL, ZENDESK_EMAIL and ZENDESK_API_TOKEN.", file=sys.stderr)
+
+# Global HTTP client for connection pooling
+_http_client: Optional[httpx.AsyncClient] = None
+
+async def get_http_client() -> httpx.AsyncClient:
+    """Get or create a shared HTTP client with connection pooling."""
+    global _http_client
+    if _http_client is None:
+        _http_client = httpx.AsyncClient(
+            limits=httpx.Limits(
+                max_keepalive_connections=20,
+                max_connections=100,
+                keepalive_expiry=30.0
+            ),
+            timeout=httpx.Timeout(30.0, connect=10.0)
+        )
+    return _http_client
+
+async def close_http_client():
+    """Close the HTTP client when shutting down."""
+    global _http_client
+    if _http_client is not None:
+        await _http_client.aclose()
+        _http_client = None
 
 # Helper function for API requests
 async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) -> Dict:
@@ -38,39 +64,39 @@ async def make_zendesk_request(method: str, endpoint: str, data: Dict = None) ->
         "Accept": "application/json"
     }
     
-    async with httpx.AsyncClient() as client:
+    client = await get_http_client()
+    try:
+        if method.upper() == "GET":
+            response = await client.get(url, auth=auth, headers=headers, params=data)
+        elif method.upper() == "POST":
+            response = await client.post(url, auth=auth, headers=headers, json=data)
+        elif method.upper() == "PUT":
+            response = await client.put(url, auth=auth, headers=headers, json=data)
+        elif method.upper() == "DELETE":
+            response = await client.delete(url, auth=auth, headers=headers)
+        else:
+            raise ValueError(f"Unsupported HTTP method: {method}")
+        
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPStatusError as e:
+        error_message = f"HTTP Status Error: {e.response.status_code}"
         try:
-            if method.upper() == "GET":
-                response = await client.get(url, auth=auth, headers=headers, params=data)
-            elif method.upper() == "POST":
-                response = await client.post(url, auth=auth, headers=headers, json=data)
-            elif method.upper() == "PUT":
-                response = await client.put(url, auth=auth, headers=headers, json=data)
-            elif method.upper() == "DELETE":
-                response = await client.delete(url, auth=auth, headers=headers)
-            else:
-                raise ValueError(f"Unsupported HTTP method: {method}")
-            
-            response.raise_for_status()
-            return response.json()
-        except httpx.HTTPStatusError as e:
-            error_message = f"HTTP Status Error: {e.response.status_code}"
-            try:
-                error_data = e.response.json()
-                error_message = f"{error_message} - {json.dumps(error_data)}"
-            except:
-                error_message = f"{error_message} - {e.response.text}"
-            
-            return {
-                "error": True,
-                "status_code": e.response.status_code,
-                "message": error_message
-            }
-        except Exception as e:
-            return {
-                "error": True,
-                "message": str(e)
-            }
+            error_data = e.response.json()
+            error_message = f"{error_message} - {json.dumps(error_data)}"
+        except:
+            error_message = f"{error_message} - {e.response.text}"
+        
+        return {
+            "error": True,
+            "status_code": e.response.status_code,
+            "message": error_message
+        }
+    except Exception as e:
+        return {
+            "error": True,
+            "message": str(e)
+        }
 
 
 

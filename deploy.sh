@@ -1,15 +1,13 @@
 #!/bin/bash
-# Zendesk MCP Server Startup Script with .env loading for Linux/AWS
+# Zendesk MCP Server Startup Script with Worker Scaling
 
 # Function to load .env file
 load_env() {
     if [ -f .env ]; then
         echo "Loading environment from .env file..."
-        # Export variables from .env file
         export $(grep -v '^#' .env | xargs)
     else
         echo ".env file not found, using default values..."
-        # Set default values here
         export ZENDESK_BASE_URL="your_subdomain_here"
         export ZENDESK_EMAIL="your_email_here"
         export ZENDESK_API_TOKEN="your_api_token_here"
@@ -19,6 +17,22 @@ load_env() {
 # Load environment variables
 load_env
 
+# Configuration for scaling
+WORKERS=${WORKERS:-4}  # Default to 4 workers, can be overridden via environment
+HOST=${HOST:-"0.0.0.0"}
+PORT=${PORT:-8021}
+BACKLOG=${BACKLOG:-2048}
+TIMEOUT_KEEP_ALIVE=${TIMEOUT_KEEP_ALIVE:-30}
+LIMIT_CONCURRENCY=${LIMIT_CONCURRENCY:-1000}
+
+echo
+echo "=== Zendesk MCP Server - Worker Scaling ==="
+echo "Workers: $WORKERS"
+echo "Host: $HOST"
+echo "Port: $PORT"
+echo "Backlog: $BACKLOG"
+echo "Timeout Keep-Alive: $TIMEOUT_KEEP_ALIVE"
+echo "Concurrency Limit: $LIMIT_CONCURRENCY"
 echo
 echo "Checking variable loading:"
 echo "ZENDESK_BASE_URL=$ZENDESK_BASE_URL"
@@ -49,8 +63,17 @@ if ! command -v mcp-zendesk &> /dev/null; then
     exit 1
 fi
 
-echo "Starting MCP server on port 8021..."
-mcp-proxy --port 8021 --pass-environment -- mcp-zendesk
+echo "Starting MCP server with $WORKERS workers on $HOST:$PORT..."
+echo "Note: Each worker can handle multiple concurrent requests via asyncio"
+mcp-proxy \
+    --host $HOST \
+    --port $PORT \
+    --workers $WORKERS \
+    --backlog $BACKLOG \
+    --timeout-keep-alive $TIMEOUT_KEEP_ALIVE \
+    --limit-concurrency $LIMIT_CONCURRENCY \
+    --pass-environment \
+    -- mcp-zendesk
 
 # Check exit status
 if [ $? -ne 0 ]; then
