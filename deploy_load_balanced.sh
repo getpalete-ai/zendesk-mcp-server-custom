@@ -81,20 +81,10 @@ events {
 
 http {
     # Use local directories to avoid permission issues
-    access_log $(pwd)/nginx_logs/access.log;
-    error_log $(pwd)/nginx_logs/error.log;
-    client_body_temp_path $(pwd)/nginx_temp/client_body;
-    proxy_temp_path $(pwd)/nginx_temp/proxy;
-    fastcgi_temp_path $(pwd)/nginx_temp/fastcgi;
-    uwsgi_temp_path $(pwd)/nginx_temp/uwsgi;
-    scgi_temp_path $(pwd)/nginx_temp/scgi;
-    
-    # Additional settings to prevent system defaults
-    sendfile on;
-    tcp_nopush on;
-    tcp_nodelay on;
-    keepalive_timeout 65;
-    types_hash_max_size 2048;
+    access_log nginx_logs/access.log;
+    error_log nginx_logs/error.log;
+    client_body_temp_path nginx_temp/client_body;
+    proxy_temp_path nginx_temp/proxy;
 
     upstream mcp_backend {
         # Load balance across MCP instances (dynamically generated)
@@ -143,11 +133,6 @@ cat >> nginx_mcp.conf << EOF
 }
 EOF
 
-# Show the generated nginx configuration for debugging
-echo "Generated nginx configuration:"
-echo "----------------------------------------"
-cat nginx_mcp.conf
-echo "----------------------------------------"
 
 # Start MCP instances
 echo "Starting MCP instances..."
@@ -171,17 +156,9 @@ done
 
 # Start nginx with our configuration
 echo "Starting nginx load balancer on port $NGINX_PORT..."
-echo "Using nginx config: $(pwd)/nginx_mcp.conf"
 
-# Test nginx configuration first
-nginx -t -c $(pwd)/nginx_mcp.conf
-if [ $? -ne 0 ]; then
-    echo "Error: nginx configuration test failed!"
-    exit 1
-fi
-
-# Start nginx with absolute path and explicit config
-nginx -c $(pwd)/nginx_mcp.conf -p $(pwd) &
+# Start nginx with explicit prefix to override all default paths
+nginx -p $(pwd) -c nginx_mcp.conf &
 
 # Store nginx PID for cleanup
 echo $! > "nginx.pid"
