@@ -62,7 +62,16 @@ fi
 echo "Starting $INSTANCES MCP server instances with nginx load balancer..."
 
 # Create local directories for nginx
+echo "Creating nginx directories..."
 mkdir -p nginx_logs nginx_temp
+chmod 755 nginx_logs nginx_temp
+
+# Verify directories were created
+if [ ! -d "nginx_logs" ] || [ ! -d "nginx_temp" ]; then
+    echo "Error: Failed to create nginx directories"
+    exit 1
+fi
+echo "Nginx directories created successfully"
 
 # Create nginx configuration with dynamic upstream servers
 cat > nginx_mcp.conf << EOF
@@ -79,6 +88,13 @@ http {
     fastcgi_temp_path $(pwd)/nginx_temp/fastcgi;
     uwsgi_temp_path $(pwd)/nginx_temp/uwsgi;
     scgi_temp_path $(pwd)/nginx_temp/scgi;
+    
+    # Additional settings to prevent system defaults
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
 
     upstream mcp_backend {
         # Load balance across MCP instances (dynamically generated)
@@ -127,6 +143,12 @@ cat >> nginx_mcp.conf << EOF
 }
 EOF
 
+# Show the generated nginx configuration for debugging
+echo "Generated nginx configuration:"
+echo "----------------------------------------"
+cat nginx_mcp.conf
+echo "----------------------------------------"
+
 # Start MCP instances
 echo "Starting MCP instances..."
 for i in $(seq 1 $INSTANCES); do
@@ -149,7 +171,17 @@ done
 
 # Start nginx with our configuration
 echo "Starting nginx load balancer on port $NGINX_PORT..."
-nginx -c $(pwd)/nginx_mcp.conf &
+echo "Using nginx config: $(pwd)/nginx_mcp.conf"
+
+# Test nginx configuration first
+nginx -t -c $(pwd)/nginx_mcp.conf
+if [ $? -ne 0 ]; then
+    echo "Error: nginx configuration test failed!"
+    exit 1
+fi
+
+# Start nginx with absolute path and explicit config
+nginx -c $(pwd)/nginx_mcp.conf -p $(pwd) &
 
 # Store nginx PID for cleanup
 echo $! > "nginx.pid"
