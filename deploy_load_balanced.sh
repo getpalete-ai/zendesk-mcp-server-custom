@@ -72,6 +72,8 @@ events {
 
 http {
     upstream mcp_backend {
+        # Session affinity for MCP stateful connections
+        ip_hash;
         # Load balance across MCP instances (dynamically generated)
 EOF
 
