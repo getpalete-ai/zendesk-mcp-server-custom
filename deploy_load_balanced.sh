@@ -59,14 +59,6 @@ if ! command -v mcp-zendesk &> /dev/null; then
     exit 1
 fi
 
-# Check if nginx is available
-if ! command -v nginx &> /dev/null && ! [ -f /usr/sbin/nginx ]; then
-    echo "Error: nginx not found. Please install nginx first."
-    echo "Ubuntu/Debian: sudo apt install nginx"
-    echo "CentOS/RHEL: sudo yum install nginx"
-    exit 1
-fi
-
 echo "Starting $INSTANCES MCP server instances with nginx load balancer..."
 
 # Create nginx configuration with dynamic upstream servers
@@ -145,7 +137,13 @@ done
 
 # Start nginx with our configuration
 echo "Starting nginx load balancer on port $NGINX_PORT..."
-nginx -c $(pwd)/nginx_mcp.conf
+nginx -c $(pwd)/nginx_mcp.conf &
+
+# Store nginx PID for cleanup
+echo $! > "nginx.pid"
+
+# Give nginx a moment to start
+sleep 3
 
 echo
 echo "Load balanced setup complete!"

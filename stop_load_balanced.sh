@@ -5,6 +5,14 @@ echo "Stopping load balanced MCP setup..."
 
 # Stop nginx
 echo "Stopping nginx..."
+if [ -f "nginx.pid" ]; then
+    nginx_pid=$(cat "nginx.pid")
+    if ps -p $nginx_pid > /dev/null 2>&1; then
+        echo "Stopping nginx with PID $nginx_pid..."
+        kill $nginx_pid
+    fi
+    rm "nginx.pid"
+fi
 nginx -s quit 2>/dev/null || pkill nginx 2>/dev/null
 
 # Stop MCP instances
