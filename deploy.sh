@@ -1,5 +1,5 @@
 #!/bin/bash
-# Zendesk MCP Server with Uvicorn Scaling
+# Zendesk MCP Server - Single mcp-proxy instance
 
 # Function to load .env file
 load_env() {
@@ -17,22 +17,14 @@ load_env() {
 # Load environment variables
 load_env
 
-# Configuration for scaling
-WORKERS=${WORKERS:-4}  # Default to 4 workers, can be overridden via environment
+# Configuration
 HOST=${HOST:-"0.0.0.0"}
 PORT=${PORT:-8021}
-BACKLOG=${BACKLOG:-2048}
-TIMEOUT_KEEP_ALIVE=${TIMEOUT_KEEP_ALIVE:-30}
-LIMIT_CONCURRENCY=${LIMIT_CONCURRENCY:-1000}
 
 echo
-echo "=== Zendesk MCP Server - Uvicorn Scaling ==="
-echo "Workers: $WORKERS"
+echo "=== Zendesk MCP Server - Single Instance ==="
 echo "Host: $HOST"
 echo "Port: $PORT"
-echo "Backlog: $BACKLOG"
-echo "Timeout Keep-Alive: $TIMEOUT_KEEP_ALIVE"
-echo "Concurrency Limit: $LIMIT_CONCURRENCY"
 echo
 echo "Checking variable loading:"
 echo "ZENDESK_BASE_URL=$ZENDESK_BASE_URL"
@@ -51,31 +43,27 @@ else
     echo "No virtual environment found. Make sure to install dependencies globally or create a venv."
 fi
 
-# Check if uvicorn is available
-if ! command -v uvicorn &> /dev/null; then
-    echo "Error: uvicorn not found. Please install uvicorn: pip install uvicorn"
+# Check if mcp-proxy is available
+if ! command -v mcp-proxy &> /dev/null; then
+    echo "Error: mcp-proxy not found. Please install the required dependencies."
     exit 1
 fi
 
-# Check if our server module exists
-if [ ! -f "mcp_zendesk/server.py" ]; then
-    echo "Error: mcp_zendesk/server.py not found."
+# Check if mcp-zendesk is available
+if ! command -v mcp-zendesk &> /dev/null; then
+    echo "Error: mcp-zendesk not found. Please install the package first."
     exit 1
 fi
 
-echo "Starting MCP server with $WORKERS workers on $HOST:$PORT..."
-echo "Note: Each worker can handle multiple concurrent requests via asyncio"
-echo "Note: Connection pooling is enabled for better performance"
+echo "Starting single MCP server on $HOST:$PORT..."
+echo "Note: For scaling, use deploy_load_balanced.sh with nginx"
 
-# Run uvicorn directly with our FastMCP server
-uvicorn mcp_zendesk.server:app \
+# Run single mcp-proxy instance
+mcp-proxy \
     --host $HOST \
     --port $PORT \
-    --workers $WORKERS \
-    --backlog $BACKLOG \
-    --timeout-keep-alive $TIMEOUT_KEEP_ALIVE \
-    --limit-concurrency $LIMIT_CONCURRENCY \
-    --log-level info
+    --pass-environment \
+    -- mcp-zendesk
 
 # Check exit status
 if [ $? -ne 0 ]; then
