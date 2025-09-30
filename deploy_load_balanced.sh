@@ -117,7 +117,7 @@ cat >> nginx_mcp.conf << EOF
             # Timeouts
             proxy_connect_timeout 30s;
             proxy_send_timeout 30s;
-            proxy_read_timeout 30s;
+
         }
     }
 }
