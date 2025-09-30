@@ -1,5 +1,5 @@
 #!/bin/bash
-# Zendesk MCP Server Startup Script with Worker Scaling
+# Zendesk MCP Server with Uvicorn Scaling
 
 # Function to load .env file
 load_env() {
@@ -26,7 +26,7 @@ TIMEOUT_KEEP_ALIVE=${TIMEOUT_KEEP_ALIVE:-30}
 LIMIT_CONCURRENCY=${LIMIT_CONCURRENCY:-1000}
 
 echo
-echo "=== Zendesk MCP Server - Worker Scaling ==="
+echo "=== Zendesk MCP Server - Uvicorn Scaling ==="
 echo "Workers: $WORKERS"
 echo "Host: $HOST"
 echo "Port: $PORT"
@@ -51,29 +51,31 @@ else
     echo "No virtual environment found. Make sure to install dependencies globally or create a venv."
 fi
 
-# Check if mcp-proxy is available
-if ! command -v mcp-proxy &> /dev/null; then
-    echo "Error: mcp-proxy not found. Please install the required dependencies."
+# Check if uvicorn is available
+if ! command -v uvicorn &> /dev/null; then
+    echo "Error: uvicorn not found. Please install uvicorn: pip install uvicorn"
     exit 1
 fi
 
-# Check if mcp-zendesk is available
-if ! command -v mcp-zendesk &> /dev/null; then
-    echo "Error: mcp-zendesk not found. Please install the package first."
+# Check if our server module exists
+if [ ! -f "mcp_zendesk/server.py" ]; then
+    echo "Error: mcp_zendesk/server.py not found."
     exit 1
 fi
 
 echo "Starting MCP server with $WORKERS workers on $HOST:$PORT..."
 echo "Note: Each worker can handle multiple concurrent requests via asyncio"
-mcp-proxy \
+echo "Note: Connection pooling is enabled for better performance"
+
+# Run uvicorn directly with our FastMCP server
+uvicorn mcp_zendesk.server:app \
     --host $HOST \
     --port $PORT \
     --workers $WORKERS \
     --backlog $BACKLOG \
     --timeout-keep-alive $TIMEOUT_KEEP_ALIVE \
     --limit-concurrency $LIMIT_CONCURRENCY \
-    --pass-environment \
-    -- mcp-zendesk
+    --log-level info
 
 # Check exit status
 if [ $? -ne 0 ]; then

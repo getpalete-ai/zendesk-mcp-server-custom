@@ -523,6 +523,24 @@ def ticket_response_prompt(ticket_id: str = None, summary: str = None) -> str:
 def ticket_analysis_prompt() -> str:
     """A prompt template for analyzing ticket data and trends."""
     return "I'd like to analyze our Zendesk ticket data to identify trends and areas for improvement. Can you help me understand what metrics and patterns to look for, and how to interpret the results to improve our customer support process?"
+# Expose the FastMCP instance for uvicorn
+app = mcp.sse_app()
+
+# Add a simple status endpoint
+from starlette.responses import JSONResponse
+from starlette.routing import Route
+
+def status_endpoint(request):
+    return JSONResponse({
+        "status": "running",
+        "server": "Zendesk MCP",
+        "version": "0.0.2",
+        "transport": "SSE"
+    })
+
+# Add status route to the app
+app.router.routes.append(Route("/status", status_endpoint))
+
 if __name__ == "__main__":
     print("Starting Zendesk MCP server...", file=sys.stderr)
     mcp.run()
