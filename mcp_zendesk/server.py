@@ -114,6 +114,26 @@ async def get_ticket_comments(ticket_id: str) -> str:
 
 
 @mcp.tool()
+async def update_custom_status(custom_status_name:str) -> str:
+    """
+    Update custom status of a specific Zendesk ticket.
+    """
+    if custom_status_name == "Escalade":
+        custom_status_id = "10472239770397"
+    elif custom_status_name == "Pending":
+        custom_status_id = "10470154568861"
+    elif custom_status_name == "Solved":
+        custom_status_id = "10470192263453"
+
+    else:
+        return f"Invalid custom status name: {custom_status_name}"
+    
+    result= await make_zendesk_request("PUT", "/api/v2/tickets/49218.json", {"ticket": {"custom_status_id": custom_status_id}})
+    return json.dumps(result)
+
+
+
+@mcp.tool()
 async def get_users(user_ids: list) -> dict:
     """
     Get details of a specific Zendesk user.
