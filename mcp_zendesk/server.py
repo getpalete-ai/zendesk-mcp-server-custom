@@ -114,7 +114,7 @@ async def get_ticket_comments(ticket_id: str) -> str:
 
 
 @mcp.tool()
-async def update_custom_status(custom_status_name:str) -> str:
+async def update_custom_status(ticket_id:str, custom_status_name:str) -> str:
     """
     Update custom status of a specific Zendesk ticket.
     """
@@ -128,7 +128,7 @@ async def update_custom_status(custom_status_name:str) -> str:
     else:
         return f"Invalid custom status name: {custom_status_name}"
     
-    result= await make_zendesk_request("PUT", "/api/v2/tickets/49218.json", {"ticket": {"custom_status_id": custom_status_id}})
+    result= await make_zendesk_request("PUT", f"/api/v2/tickets/{ticket_id}.json", {"ticket": {"custom_status_id": custom_status_id}})
     return json.dumps(result)
 
 
