@@ -297,12 +297,10 @@ async def update_ticket(ticket_id: int, status: Optional[str] = None,
                 ticket_data["ticket"]["custom_fields"].append({"id": field_id, "value": custom_fields[field]})
             except KeyError:
                 raise ValueError(f"Field {field} not found in field map. Existing fields: {field_map}")
-
-    if not any([status, priority]):
-        return "No update parameters provided. Ticket remains unchanged."
+    print(ticket_data)
     
     result = await make_zendesk_request("PUT", f"/api/v2/tickets/{ticket_id}.json", ticket_data)
-    
+    print(result)
     if "error" in result:
         return f"Error updating ticket: {result.get('message', 'Unknown error')}"
     
