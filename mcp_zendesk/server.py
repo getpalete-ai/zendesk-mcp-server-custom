@@ -124,6 +124,8 @@ async def update_custom_status(ticket_id:str, custom_status_name:str) -> str:
         custom_status_id = "10470154568861"
     elif custom_status_name == "Solved":
         custom_status_id = "10470192263453"
+    elif custom_status_name == "Refund_pending":
+        custom_status_id = "23326269010973"
 
     else:
         return f"Invalid custom status name: {custom_status_name}"
