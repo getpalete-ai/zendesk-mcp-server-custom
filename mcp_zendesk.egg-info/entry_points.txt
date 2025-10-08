@@ -1,2 +1,0 @@
-[console_scripts]
-mcp-zendesk = mcp_zendesk.__init__:main
