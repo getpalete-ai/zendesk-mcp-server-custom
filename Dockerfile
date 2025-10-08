@@ -20,10 +20,14 @@ RUN apt-get update && apt-get install -y \
 # Copy project files
 COPY pyproject.toml setup.cfg ./
 COPY mcp_zendesk/ ./mcp_zendesk/
+COPY entrypoint.sh ./
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install -e .
+
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app && \
@@ -43,4 +47,4 @@ ENV ZENDESK_BASE_URL="" \
     ZENDESK_API_TOKEN=""
 
 # Run the application
-CMD ["python", "-c", "import sys; sys.path.append('/app'); from mcp_zendesk.server import app; import uvicorn; uvicorn.run(app, host='${SERVER_HOST}', port=${SERVER_PORT})"]
+CMD ["./entrypoint.sh"]
