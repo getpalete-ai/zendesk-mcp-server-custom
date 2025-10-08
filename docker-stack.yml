@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  zendesk-mcp:
+    image: zendesk-mcp-server:latest
+    deploy:
+      replicas: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    environment:
+      - ZENDESK_BASE_URL=${ZENDESK_BASE_URL}
+      - ZENDESK_EMAIL=${ZENDESK_EMAIL}
+      - ZENDESK_API_TOKEN=${ZENDESK_API_TOKEN}
+    ports:
+      - "8021:8021"
+    networks:
+      - zendesk-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8021/status')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  zendesk-network:
+    driver: overlay
+    attachable: true

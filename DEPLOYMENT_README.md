@@ -1,4 +1,4 @@
-# Docker Deployment Guide for Zendesk MCP Server
+# Deployment Guide for Zendesk MCP Server
 
 This guide explains how to deploy the Zendesk MCP Server using Docker.
 
@@ -68,6 +68,45 @@ curl http://localhost:8021/status
 
 ## Production Deployment
 
+### Using Docker Swarm
+
+For production deployment with automatic load balancing and orchestration:
+
+```bash
+# 1. Setup (run once) - prepares scripts and creates symlinks
+chmod +x setup-swarm.sh
+./setup-swarm.sh
+
+# 2. Deploy with load balancing (builds image + deploys stack)
+./deploy
+
+# 3. Scale to multiple replicas (optional)
+./scale 5
+
+# 4. Check status
+./status
+
+# 5. View logs
+./logs
+
+# 6. Stop service
+./stop
+```
+
+**What Each Step Does:**
+- **Step 1**: Prepares scripts and creates convenient symlinks (run once)
+- **Step 2**: Builds Docker image + deploys stack with 3 replicas + load balancing
+- **Step 3**: Scales to more replicas (optional)
+- **Steps 4-6**: Management commands
+
+**Docker Swarm Features:**
+- ✅ **Automatic load balancing** across replicas
+- ✅ **Health checks** and automatic restarts
+- ✅ **Rolling updates** with zero downtime
+- ✅ **Resource limits** and reservations
+- ✅ **Service discovery** between containers
+- ✅ **Built-in scaling** and management
+
 ### Using Docker Compose with Nginx
 
 For production deployment with load balancing and SSL termination:
@@ -119,6 +158,49 @@ The container includes health checks that verify the service is responding:
 docker inspect --format='{{.State.Health.Status}}' zendesk-mcp-server
 ```
 
+## Docker Swarm Management
+
+### Available Commands
+
+```bash
+# Deploy service
+./deploy
+
+# Scale service
+./scale 5
+
+# Check status
+./status
+
+# View logs
+./logs
+
+# Stop service
+./stop
+
+# Restart service
+./automate-swarm.sh restart
+```
+
+### Docker Swarm Commands
+
+```bash
+# Check swarm status
+docker node ls
+
+# Check service status
+docker service ls
+
+# Check service details
+docker service ps zendesk-stack_zendesk-mcp
+
+# View service logs
+docker service logs zendesk-stack_zendesk-mcp
+
+# Update service
+docker service update zendesk-stack_zendesk-mcp
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -126,6 +208,8 @@ docker inspect --format='{{.State.Health.Status}}' zendesk-mcp-server
 1. **Container won't start**: Check environment variables are set correctly
 2. **Connection refused**: Verify the service is running on the correct port
 3. **Authentication errors**: Verify Zendesk credentials are correct
+4. **Swarm not initialized**: Run `docker swarm init` first
+5. **Service not scaling**: Check if all replicas are healthy with `./status`
 
 ### Debug Mode
 
@@ -150,7 +234,20 @@ docker logs -f zendesk-mcp-server
 
 ## Scaling
 
-### Horizontal Scaling
+### Docker Swarm Scaling (Recommended)
+
+```bash
+# Scale to 5 replicas with load balancing
+./scale 5
+
+# Check scaling status
+./status
+
+# View service details
+docker service ps zendesk-stack_zendesk-mcp
+```
+
+### Docker Compose Scaling
 
 To run multiple instances behind a load balancer:
 
