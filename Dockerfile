@@ -41,4 +41,4 @@ ENV ZENDESK_BASE_URL="" \
     ZENDESK_API_TOKEN=""
 
 # Run the application
-CMD ["python", "-m", "mcp_zendesk.server"]
+CMD ["python", "mcp_zendesk/server.py"]
