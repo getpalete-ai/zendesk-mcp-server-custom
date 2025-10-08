@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  zendesk-mcp:
+    build: .
+    container_name: zendesk-mcp-server
+    ports:
+      - "8021:8021"
+    environment:
+      - ZENDESK_BASE_URL=${ZENDESK_BASE_URL}
+      - ZENDESK_EMAIL=${ZENDESK_EMAIL}
+      - ZENDESK_API_TOKEN=${ZENDESK_API_TOKEN}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8021/status')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - zendesk-mcp-network
+
+  # Optional: Add nginx reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: zendesk-mcp-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - zendesk-mcp
+    restart: unless-stopped
+    networks:
+      - zendesk-mcp-network
+    profiles:
+      - production
+
+networks:
+  zendesk-mcp-network:
+    driver: bridge
+
+volumes:
+  nginx_logs:
+    driver: local
