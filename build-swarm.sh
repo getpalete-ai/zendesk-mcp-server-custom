@@ -18,12 +18,9 @@ if [ ! -f .env ]; then
     exit 1
 fi
 
-# Build the Docker image with parameters
+# Build the Docker image
 echo "Building Docker image..."
-docker build \
-  --build-arg SERVER_HOST=${SERVER_HOST:-0.0.0.0} \
-  --build-arg SERVER_PORT=${SERVER_PORT:-8021} \
-  -t zendesk-mcp-server:latest .
+docker build -t zendesk-mcp-server:latest .
 
 # Verify image was created
 if docker images | grep -q "zendesk-mcp-server"; then

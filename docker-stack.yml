@@ -24,6 +24,8 @@ services:
       - ZENDESK_BASE_URL=${ZENDESK_BASE_URL}
       - ZENDESK_EMAIL=${ZENDESK_EMAIL}
       - ZENDESK_API_TOKEN=${ZENDESK_API_TOKEN}
+      - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
+      - SERVER_PORT=${SERVER_PORT:-8021}
     ports:
       - "8021:8021"
     networks:
