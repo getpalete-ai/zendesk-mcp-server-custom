@@ -61,7 +61,7 @@ done
 
 # Test the service
 echo "Testing service..."
-if curl -f http://localhost:8021/status > /dev/null 2>&1; then
+if curl -f http://127.0.0.1:8021/status > /dev/null 2>&1; then
     echo "✅ Service is responding!"
 else
     echo "❌ Service is not responding!"
@@ -70,8 +70,8 @@ fi
 
 echo
 echo "🎉 Deployment completed successfully!"
-echo "Service available at: http://localhost:8021"
-echo "Health check: http://localhost:8021/status"
+echo "Service available at: http://127.0.0.1:8021"
+echo "Health check: http://127.0.0.1:8021/status"
 echo
 echo "Management commands:"
 echo "  Scale: ./scale-swarm.sh 5"
