@@ -2,7 +2,7 @@
 services:
   zendesk-mcp:
     build: .
-    container_name: zendesk-mcp-server
+    #container_name: zendesk-mcp-server
     ports:
       - "${EXTERNAL_PORT:-8021}:${SERVER_PORT:-8021}"
     environment:
