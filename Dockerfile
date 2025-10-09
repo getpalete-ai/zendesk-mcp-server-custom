@@ -22,12 +22,12 @@ COPY pyproject.toml setup.cfg ./
 COPY mcp_zendesk/ ./mcp_zendesk/
 COPY entrypoint.sh ./
 
+# Make entrypoint script executable
+RUN chmod +x entrypoint.sh
+
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install -e .
-
-# Make entrypoint script executable
-RUN chmod +x entrypoint.sh
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app && \
