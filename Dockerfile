@@ -27,7 +27,8 @@ RUN chmod +x entrypoint.sh
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
-    pip install -e .
+    pip install -e . && \
+    pip install mcp[cli]
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app && \
