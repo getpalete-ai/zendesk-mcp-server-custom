@@ -10,6 +10,8 @@ services:
       - ZENDESK_API_TOKEN=${ZENDESK_API_TOKEN}
       - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
       - SERVER_PORT=${SERVER_PORT:-8021}
+      - INSTANCES=${INSTANCES:-3}
+      - BASE_PORT=${BASE_PORT:-8021}
     env_file:
       - .env
     restart: unless-stopped
@@ -21,7 +23,7 @@ services:
       start_period: 40s
     networks:
       - zendesk-mcp-network
-    # Use entrypoint.sh for mcp-proxy
+    # Use entrypoint.sh for load-balanced mcp-proxy
     command: ["./entrypoint.sh"]
 
   # Nginx load balancer (always enabled)
