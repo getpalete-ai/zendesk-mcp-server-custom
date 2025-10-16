@@ -78,3 +78,23 @@ docker-compose up -d
 
 ## Support
 - email: nicolas@getpalete.com & oussama@getpalete.com
+
+## Functionalities
+
+This MCP server exposes the following Zendesk operations as tools:
+
+**Ticket Management:**
+- `get_tickets` - Retrieve list of recent tickets
+- `get_ticket_details` / `get_tickets_details` - Get detailed information for specific ticket(s)
+- `create_ticket` - Create new support tickets with subject, description, priority, and tags
+- `update_ticket` - Modify ticket status, priority, tags, and custom fields
+- `update_custom_status` - Update custom status (Escalade, Pending, Solved, Refund_pending). Present custom status are harcoded and project specific - to be adapted using `get_tickets_fields_map` )
+- `search_tickets` - Search tickets using query strings with sorting options
+- `get_ticket_comments` - Retrieve all comments from a specific ticket
+- `add_ticket_comment` - Add public or private comments to tickets
+
+**User Management:**
+- `get_user` / `get_users` - Retrieve user details using user id(s)
+
+**Configuration:**
+- `get_tickets_fields_map` - Get mapping of available ticket fields and custom fields
