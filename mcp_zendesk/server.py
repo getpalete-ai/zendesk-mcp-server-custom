@@ -112,7 +112,6 @@ async def get_ticket_comments(ticket_id: str) -> str:
 
     return json.dumps(comments_result)
 
-
 @mcp.tool()
 async def update_custom_status(ticket_id:str, custom_status_name:str) -> str:
     """
@@ -133,8 +132,6 @@ async def update_custom_status(ticket_id:str, custom_status_name:str) -> str:
     result= await make_zendesk_request("PUT", f"/api/v2/tickets/{ticket_id}.json", {"ticket": {"custom_status_id": custom_status_id}})
     return json.dumps(result)
 
-
-
 @mcp.tool()
 async def get_users(user_ids: list) -> dict:
     """
@@ -151,7 +148,6 @@ async def get_users(user_ids: list) -> dict:
     
     dict_users = {user.pop("id"): user for user in users}
     return dict_users
-
 
 @mcp.tool()
 async def get_tickets_details(ticket_ids: list) -> str:
