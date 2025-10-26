@@ -26,7 +26,8 @@ if not result:
             print(f"Found .env at {path}, load result: {result}")
             break
 
-from server import make_zendesk_request, update_ticket, get_ticket_details, get_ticket_comments,get_transfer_details
+from mcp_zendesk.server import make_zendesk_request, update_ticket, get_ticket_details, get_ticket_comments
+from mcp_zendesk.server import get_tickets_details
 import asyncio
 
 ZENDESK_BASE_URL = os.environ.get("ZENDESK_BASE_URL")
@@ -82,10 +83,10 @@ async def test_get_tickets_paginated():
     page = input("Enter page number (default: 3): ") or "3"
     per_page = input("Enter per_page (default: 1000): ") or "1000"
     result = await make_zendesk_request("GET", "/api/v2/tickets", data={"page": int(page), "per_page": int(per_page)})
-    for field in result:
-        print(field)
+
     print(f"Number of tickets: {len(result['tickets'])}")
     print(f"Next page: {result.get('next_page')}")
+    return result["tickets"]
 
 async def test_get_tickets_show_many():
     """Test getting multiple tickets by IDs"""
@@ -120,7 +121,7 @@ async def test_get_tickets_details():
     print("Testing: Get Tickets Details")
     ticket_ids_input = input("Enter ticket IDs (comma-separated): ")
     ticket_ids = [int(id.strip()) for id in ticket_ids_input.split(",")]
-    from server import get_tickets_details
+    
     result = await get_tickets_details(ticket_ids)
     print(f"Number of tickets: {len(result)}")
 
@@ -145,12 +146,6 @@ async def test_update_ticket_custom_fields():
     result = await update_ticket(ticket_id, custom_fields={field_name: field_value})
     print(result)
 
-async def test_get_transfer_details():
-    """Test getting transfer details"""
-    print("Testing: Get Transfer Details")
-    transfer_id = input("Enter transfer ID (e.g., tr_IREC88c0fCBuLLc1lZCnV): ")
-    transfer = await get_transfer_details(transfer_id)
-    print("Transfer details:", transfer)
 
 async def test_get_ticket_details():
     """Test getting ticket details"""
@@ -284,7 +279,6 @@ def display_menu():
     print("7.  Get Tickets Details")
     print("8.  Analyze Ticket Field Types")
     print("9.  Update Ticket Custom Fields")
-    print("10. Get Transfer Details")
     print("11. Get Ticket Details")
     print("12. Get Ticket Comments")
     print("13. Add Ticket Comment")
@@ -323,8 +317,7 @@ async def main():
             await test_analyze_ticket_field_types()
         elif choice == "9":
             await test_update_ticket_custom_fields()
-        elif choice == "10":
-            await test_get_transfer_details()
+
         elif choice == "11":
             await test_get_ticket_details()
         elif choice == "12":

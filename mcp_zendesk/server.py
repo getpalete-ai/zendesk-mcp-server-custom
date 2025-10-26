@@ -404,9 +404,6 @@ async def add_ticket_comment(ticket_id: int, comment: str, public: bool = True) 
     return f"Added {status} comment to ticket {ticket_id} successfully!"
 
 
-
-# === RESOURCES ===
-
 @mcp.tool()
 async def get_tickets(page: int = 1, per_page: int = 1000) -> str:
     """Get a list of recent Zendesk tickets."""
